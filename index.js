@@ -84,5 +84,5 @@ pinboard.dates(user.token, function(err, res) {
 
   dates = res.dates;
 
-  setNextSend(true);
+  setNextSend((process.argv.indexOf('--today') > -1));
 });
