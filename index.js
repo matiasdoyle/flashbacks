@@ -19,31 +19,27 @@ var templateFiles = {
 
 var user = config.user;
 
-// TODO Should save to db..
-var dates = {};
-pinboard.dates(user.token, function(err, res) {
-  if (err) throw err;
-
-  dates = res.dates;
-});
-
-var nextSend = function(first) {
+var nextSend = function(today) {
   var next = moment().hour(8).minute(0).second(0);
-  if (!first) next.add('days', 1);
+  if (!today) next.add('days', 1);
 
   console.log('Next send in', next.format());
   return next.diff(moment());
 };
 
-var setNextSend = function(first) {
-  setInterval(send, nextSend(first));
+var setNextSend = function(today) {
+  console.log('Setting timeout');
+  setTimeout(send, nextSend(today));
 };
 
 var send = function() {
-  var date = moment();
-  date.month(date.month() - 3);
+  var date = moment()
+    .month(moment().month() - 3)
+    .format('YYYY-MM-DD');
 
-  if (dates[date.format('YYYY-MM-DD')] === 0) {
+  console.log('Finding links for', date);
+
+  if (dates[date] === 0) {
     console.log('No links found');
     return setNextSend();
   }
@@ -51,12 +47,12 @@ var send = function() {
   getTemplates(templateFiles, function(err, templates) {
     if (err) throw err;
 
-    pinboard.get(user.token, { date: '2013-11-14' }, function(err, res) {
+    pinboard.get(user.token, { date: date }, function(err, res) {
       if (err) throw err;
 
       var message = {
         message: {
-          subject: 'Links from ' + res.date.toISOString().split('T')[0], // TODO: Yeah very good idea...
+          subject: 'Links from ' + moment(res.date).format('YYYY-MM-DD'), // TODO: Wrap in function
           html: templates.html(res),
           text: templates.text(res),
           from_email: 'flashbacks@matias.io',
@@ -70,6 +66,7 @@ var send = function() {
         async: false
       };
 
+      console.log('Sending email with message', message);
       mandrillClient.messages.send(message, function(result) {
         console.log('Message sent', result);
         setNextSend();
@@ -80,4 +77,12 @@ var send = function() {
   });
 };
 
-setNextSend();
+// TODO Should save to db..
+var dates = {};
+pinboard.dates(user.token, function(err, res) {
+  if (err) throw err;
+
+  dates = res.dates;
+
+  setNextSend(true);
+});
