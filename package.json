@@ -9,6 +9,9 @@
   "author": "Matias Doyle <hello@matiasdoyle.com>",
   "license": "MIT",
   "dependencies": {
-    "request": "~2.27.0"
+    "request": "~2.27.0",
+    "mandrill-api": "~1.0.37",
+    "handlebars": "~1.1.2",
+    "moment": "~2.4.0"
   }
 }
