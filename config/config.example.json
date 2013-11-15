@@ -1,0 +1,8 @@
+{
+	"mandrill": "api key",
+	"user": {
+		"email": "email",
+		"name": "name",
+		"token": "pinboard token"
+	}
+}
